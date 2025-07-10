@@ -1,12 +1,17 @@
+
 const { google } = require('googleapis');
-const { getAuthClient } = require('./googleAuthHelper.cjs');
 
-exports.handler = async function () {
+exports.handler = async () => {
   try {
-    const auth = getAuthClient();
-    const calendar = google.calendar({ version: 'v3', auth });
+    const auth = new google.auth.JWT(
+      process.env.GOOGLE_CLIENT_EMAIL,
+      null,
+      process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      ['https://www.googleapis.com/auth/calendar']
+    );
 
-    const result = await calendar.events.list({
+    const calendar = google.calendar({ version: 'v3', auth });
+    const res = await calendar.events.list({
       calendarId: 'primary',
       timeMin: new Date().toISOString(),
       maxResults: 10,
@@ -16,7 +21,7 @@ exports.handler = async function () {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(result.data.items),
+      body: JSON.stringify(res.data.items || []),
     };
   } catch (error) {
     return {

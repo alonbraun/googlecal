@@ -1,11 +1,17 @@
-const { google } = require('googleapis');
-const { getAuthClient } = require('./googleAuthHelper.cjs');
 
-exports.handler = async function (event) {
+const { google } = require('googleapis');
+
+exports.handler = async (event) => {
   try {
-    const { summary, description, start, end } = JSON.parse(event.body);
-    const auth = getAuthClient();
+    const auth = new google.auth.JWT(
+      process.env.GOOGLE_CLIENT_EMAIL,
+      null,
+      process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      ['https://www.googleapis.com/auth/calendar']
+    );
+
     const calendar = google.calendar({ version: 'v3', auth });
+    const { summary, description, start, end } = JSON.parse(event.body);
 
     const response = await calendar.events.insert({
       calendarId: 'primary',
