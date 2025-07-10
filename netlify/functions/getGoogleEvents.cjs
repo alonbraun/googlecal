@@ -1,35 +1,32 @@
 const { google } = require('googleapis');
+const path = require('path');
 
-exports.handler = async function() {
+exports.handler = async (event) => {
   try {
-    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-    const jwtClient = new google.auth.JWT(
-      credentials.client_email,
-      null,
-      credentials.private_key,
-      ['https://www.googleapis.com/auth/calendar.readonly']
-    );
+    const auth = new google.auth.GoogleAuth({
+      keyFile: path.join(__dirname, 'service-account.json'),
+      scopes: ['https://www.googleapis.com/auth/calendar'],
+    });
 
-    await jwtClient.authorize();
-    const calendar = google.calendar({ version: 'v3', auth: jwtClient });
+    const authClient = await auth.getClient();
+    const calendar = google.calendar({ version: 'v3', auth: authClient });
 
-    const now = new Date().toISOString();
     const res = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: now,
+      timeMin: new Date().toISOString(),
       maxResults: 10,
       singleEvents: true,
-      orderBy: 'startTime'
+      orderBy: 'startTime',
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify(res.data.items)
+      body: JSON.stringify(res.data.items),
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: err.message }),
     };
   }
 };
