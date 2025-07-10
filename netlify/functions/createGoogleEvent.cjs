@@ -3,36 +3,35 @@ const { google } = require('googleapis');
 exports.handler = async function(event) {
   try {
     const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-    const calendarId = 'alon@riverbanks.com';
-    const { summary, start, end, description } = JSON.parse(event.body);
-
-    const auth = new google.auth.JWT(
+    const jwtClient = new google.auth.JWT(
       credentials.client_email,
       null,
       credentials.private_key,
       ['https://www.googleapis.com/auth/calendar']
     );
 
-    const calendar = google.calendar({ version: 'v3', auth });
+    await jwtClient.authorize();
+    const calendar = google.calendar({ version: 'v3', auth: jwtClient });
 
+    const body = JSON.parse(event.body);
     const res = await calendar.events.insert({
-      calendarId,
+      calendarId: 'primary',
       requestBody: {
-        summary,
-        description,
-        start: { dateTime: start },
-        end: { dateTime: end }
+        summary: body.summary,
+        description: body.description,
+        start: { dateTime: body.start },
+        end: { dateTime: body.end }
       }
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ eventId: res.data.id, htmlLink: res.data.htmlLink }),
+      body: JSON.stringify({ id: res.data.id, link: res.data.htmlLink })
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message || err.toString() }),
+      body: JSON.stringify({ error: err.message })
     };
   }
 };
