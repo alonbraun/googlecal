@@ -1,16 +1,10 @@
 const { google } = require('googleapis');
-const path = require('path');
+const { auth } = require('./googleAuthHelper.cjs'); // Adjust path if needed
 
-exports.handler = async (event) => {
+exports.handler = async () => {
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: path.join(__dirname, 'service-account.json'),
-      scopes: ['https://www.googleapis.com/auth/calendar'],
-    });
-
-    const authClient = await auth.getClient();
-    const calendar = google.calendar({ version: 'v3', auth: authClient });
-
+    const calendar = google.calendar({ version: 'v3', auth });
+    
     const res = await calendar.events.list({
       calendarId: 'primary',
       timeMin: new Date().toISOString(),
@@ -19,14 +13,16 @@ exports.handler = async (event) => {
       orderBy: 'startTime',
     });
 
+    const events = res.data.items || [];
+
     return {
       statusCode: 200,
-      body: JSON.stringify(res.data.items),
+      body: JSON.stringify(events),
     };
-  } catch (err) {
+  } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message }),
+      body: JSON.stringify({ error: error.message }),
     };
   }
 };
