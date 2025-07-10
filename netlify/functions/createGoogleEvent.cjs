@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     const { summary, description, start, end } = JSON.parse(event.body);
 
     const response = await calendar.events.insert({
-      calendarId: 'primary',
+      calendarId: 'alon@riverbanks.com',
       requestBody: {
         summary,
         description,

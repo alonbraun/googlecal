@@ -12,7 +12,7 @@ exports.handler = async () => {
 
     const calendar = google.calendar({ version: 'v3', auth });
     const res = await calendar.events.list({
-      calendarId: 'primary',
+      calendarId: 'alon@riverbanks.com',
       timeMin: new Date().toISOString(),
       maxResults: 10,
       singleEvents: true,

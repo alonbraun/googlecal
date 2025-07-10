@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     const calendar = google.calendar({ version: 'v3', auth });
 
     await calendar.events.delete({
-      calendarId: 'primary',
+      calendarId: 'alon@riverbanks.com',
       eventId,
     });
 
