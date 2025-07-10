@@ -1,9 +1,7 @@
 {
-  "name": "gcal-netlify",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "name": "gcal-netlify-project",
+  "type": "module",
   "dependencies": {
-    "googleapis": "^133.0.0"
+    "googleapis": "^118.0.0"
   }
 }
